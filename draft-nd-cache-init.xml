@@ -216,24 +216,139 @@
 
 		      <t>
 		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
 	      </section>
-	      <section title="Hosts Explicitly Advertizing Their GUAs">
+	      <section title="Hosts Explicitly Advertizing Their GUAs Using Existing ND Mechanisms">
+		      <t>
+			      The Neighbor Discovery is designed to allow IPv6 nodes to discover neighboring nodes rechability and learn IPv6 to link-layer addresses mapping. Therefore ND seems to be the most appropriate tool to inform the first-hop routers about addresses the host is going to use. The following sections discusses potential apptoaches in more details.
+		      </t>
+		      <section title="Host Sending Unsolicited NA">
 		      <t>
 		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	              </section>
+		      <section title="Option2">
 		      <t>
 		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	              </section>
+		      <section title="Option2">
+		      <t>
+		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	              </section>
 	      </section>
 	      <section title="Initiating Hosts2Routers Communication">
 		      <t>
+			      Every time the host configures a new GUA (when the address enters the Optimistic state or, if the optimistic DAD is not used, as soon as it changes the state from tentative to preferred) the host can a ping or traceroute packet to the default gateway LLA. As the RTT to the dafault gateway is lower than RTT to any off-link destinations it's quite likely that the router would start the neighbor discovery process for the host GUA before the first packet of the returning traffic arrives. There are pretty good chances that the process would be completed before the actual data traffic reaches the router. 
 		      </t>
+		      <section title="Pros">
+			      <t>
+				      <list style="symbols">
+					      <t>
+						      As data packets are involved, there is no potential impact caused by smart wireless infrastructure performing ND proxy.
+					      </t>
+					      <t>
+						      Full compliance with existing standards.
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
 		      <t>
+				      <list style="symbols">
+					      <t>
+						      Data packets to the router LLA could be blocked by security policy or control plane protection mechanism.
+					      </t>
+					      <t>
+						      If the first hop redunancy is implemented in the network the host ping/traceroute packet would reach the active router only. All backup routers would not receive it and therefore would not start populating the cache. So in the case of asymmetric traffic flow (packets leave the network via one router while the return flow is going via another) the backup router(s) still would not have the cache entry. (A hacky way to overcome this limitation would be sending ping/tracroute packet to 'all routers' ff02::2 multicast address).
+
+					      </t>
+				      </list>
 		      </t>
+	              </section>
 	      </section>
 	      <section title="Tweaking Probing Algorithms">
 		      <t>
 		      </t>
 		      <t>
 		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+					      </t>
+				      </list>
+		      </t>
+	              </section>
 	      </section>
 
     </section>
