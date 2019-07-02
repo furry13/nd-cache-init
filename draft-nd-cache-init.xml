@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC4033 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4033.xml">
+<!ENTITY RFC4429 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4429.xml">
+<!ENTITY RFC4861 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4861.xml">
+<!ENTITY RFC4941 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4941.xml">
+<!ENTITY RFC6052 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6052.xml">
+<!ENTITY RFC6105 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6105.xml">
+<!ENTITY RFC6146 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6146.xml">
+<!ENTITY RFC6147 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6147.xml">
+<!ENTITY RFC6877 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6877.xml">
+<!ENTITY RFC7050 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7050.xml">
+<!ENTITY RFC7225 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7225.xml">
+<!ENTITY RFC7556 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7556.xml">
+<!ENTITY RFC7858 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7858.xml">
+<!ENTITY RFC8305 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8305.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs),
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<rfc ipr="trust200902"
+     obsoletes=""
+     category="info"
+     docName="draft-linkova-v6ops-nd-cache-init-00">
+
+  <!-- category values: std, bcp, info, exp, and historic -->
+
+  <!-- ***** FRONT MATTER ***** -->
+
+  <front>
+    <!-- The abbreviated title is used in the page header - it is only necessary if the
+         full title is longer than 39 characters -->
+
+    <title>Neighbor Cache Entries on First-Hop Routers: Operational Considerations </title>
+
+    <!-- add 'role="editor"' below for the editors if appropriate -->
+    <author fullname="Jen Linkova" initials="J." surname="Linkova">
+      <organization>Google</organization>
+
+      <address>
+        <postal>
+          <street>1 Darling Island Rd</street>
+          <city>Pyrmont</city>
+          <region>NSW</region>
+          <code>2009</code>
+          <country>AU</country>
+        </postal>
+
+        <phone></phone>
+        <email>furry@google.com</email>
+      </address>
+    </author>
+
+    <date/>
+
+    <!-- If the month and year are both specified and are the current ones, xml2rfc will fill
+         in the current day for you. If only the current year is specified, xml2rfc will fill
+	 in the current day and month for you. If the year is not the current one, it is
+	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the
+	 purpose of calculating the expiry date).  With drafts it is normally sufficient to
+	 specify just the year. -->
+
+    <!-- Meta-data Declarations -->
+
+    <area>Operations and Management Area (ops)</area>
+
+    <workgroup>v6ops</workgroup>
+
+    <!-- WG name at the upperleft corner of the doc,
+         IETF is fine for individual submissions.
+	 If this element is not present, the default is "Network Working Group",
+         which is used by the RFC Editor as a nod to the history of the IETF. -->
+
+    <keyword>template</keyword>
+
+    <!-- Keywords will be incorporated into HTML output
+         files in a meta tag but they have no effect on text or nroff
+         output. If you submit your draft to the RFC Editor, the
+         keywords will be used for the search engine. -->
+
+    <abstract>
+	    <t>
+		    Neighbor Discovery (RFC4861) used by IPv6 nodes to determine the link-layer addresses of neighboring nodes as well as to discover and maintain reachability information. This document discusses how the neighbor discovery state machine on a first-hop router is causing user-visible connectivity issues when a new (not beeing seen on the network before) IPv6 address is being used.
+	    </t>
+    </abstract>
+  </front>
+
+  <middle>
+	  <section title="Introduction">
+		  <t>
+			  The section 7.2.5 of <xref target="RFC4861"/> states:
+			  "
+			  When a valid Neighbor Advertisement is received (either solicited or
+   unsolicited), the Neighbor Cache is searched for the target's entry.
+   If no entry exists, the advertisement SHOULD be silently discarded.
+   There is no need to create an entry if none exists, since the
+   recipient has apparently not initiated any communication with the
+   target.
+			  "
+		  </t>
+		  <t>
+			  This approach is perfectly suitable for host2host communications which are in most cases bi-directional and it could be expected that if a host A has an ND cache entry for the host B IPv6 address, the host B also has the corresponding ND entry for the host A address in its cache. However when a host communicates to off-link destinations via its first-hop router that logic does not apply. Here is the most typical scenario when the problem may arise: 
+		  </t>
+		  <t>
+			  <list style="numbers">
+				  <t>
+					  When a host joins the network it receives an RA packet from the first-hop router (either a periodic unsolicited RA or a response to an RS sent by the host). The RA contains information the host needs to perform SLAAC and to configure its network stack. Among other things the host populates its ND cache with the router link-local address and potentially link-layer address (if included in the RA Source Link-Layer Address option). 
+				  </t>
+				  <t>
+					  The host starts opening connections to off-link destinations. Very comon use case is a mobile device sending probes to detect the Internet connectivity and/or the captive portals presence on the network. To speed up that process many implementations are using the Optimistic Duplicate Address Detection (<xref target="RFC4429"/>) which allows them to send probes from their GUA before the DAD process is completed. Imprortant point here is that at that moment the device ND cache contains all information required to send those probes (such as the default gateway LLA and the link-layer address). The router ND cache, however, might contain an entry for the device link-local address (if the device has been performing the ND process for the roiter LLA) but there are no entries for the device GUA.
+				  </t>
+				  <t>
+					  Response packets for the probes (or any other traffic sent by the host) are received by the first-hop router. As the router does not have any ND cache entry for the host GUA, the router starts the neighbor discover process by creating an INCOMPLETE cache entry and then sending an NS to the Solicited Node Multicast Address. Apparently most of the router implementations buffer only one data packet while performing the ND process for its destination. Therefore all packets for the host GUA, except for the very first one are dropped until the address resolution process is completed.
+				  </t>
+				  <t>
+					  As many implementations send multiple probes in parallel it's very likely that all probes ex. the first one would be considered failed. If the host implements an exponential backoff for probing it leads to user-noticeble delay in detecting network connectivity/reporting the network as usable.
+				  </t>
+			  </list>
+		  </t>
+		  <t>
+			  The above-mentioned scenario illustrates the problem happening when the device connects to the network for the first time/after a long timeout. However the same sequence of events happen when the host starts using the new (previously unseen by the router) GUA (e.g. a new privacy address <xref target="RFC4941"/>).
+		  </t>
+		  <t>
+			  While in dual-stack networks this problem might hidden by Happy Eyeballs (<xref target="RFC8305"/>) it manifests itself quite clearly in IPv6-only networks, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solitions as unstable and non-deployable.
+		  </t>
+		  
+      <section title="Requirements Language">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref
+        target="RFC2119">RFC 2119</xref>.</t>
+      </section>
+      <section title="Terminology">
+	      <t>
+		      Neighbor Discovery:
+	      </t>
+	      <t>
+		      SLAAC:
+	      </t>
+	      <t>
+		      NA:
+	      </t>
+	      <t>
+		      NS:
+	      </t>
+	      <t>
+		      RS:
+	      </t> 
+	      <t>
+		      RA:
+	      </t>
+	      <t>
+		      LLA:
+	      </t>
+	      <t>
+		      GUA:
+	      </t>
+
+	      <t>
+		      DAD:
+	      </t>
+	      <t>
+		      Optimistic DAD:
+	      </t>
+
+         </section>
+      </section>
+
+      <section title="Potential Solutions">
+	      <t>
+		      The problem could be addressed from different angles. Possible approaches are:
+		      <list style="symbols">
+			      <t>
+				      Make routers learn the host GUAs while the host perform SLAAC for those addresses.
+			      </t>
+			      <t>
+				      Make the host explicitly advertize its GUAs using Neighbor Discovery mechanisms.
+			      </t>
+			      <t>
+				      Make the host to initiate bidirectional communication to the router using the host GUA.
+			      </t>
+			      <t>
+				      Make the probing logic on hosts more robust.
+			      </t>
+		      </list>
+	      </t>
+	      <t>
+		      The following sections discuss those approaches in more details.
+	      </t>
+	      <section title="Routers Learining Hosts GUAs During SLAAC">
+		      <t>
+		      </t>
+
+		      <t>
+		      </t>
+	      </section>
+	      <section title="Hosts Explicitly Advertizing Their GUAs">
+		      <t>
+		      </t>
+		      <t>
+		      </t>
+	      </section>
+	      <section title="Initiating Hosts2Routers Communication">
+		      <t>
+		      </t>
+		      <t>
+		      </t>
+	      </section>
+	      <section title="Tweaking Probing Algorithms">
+		      <t>
+		      </t>
+		      <t>
+		      </t>
+	      </section>
+
+    </section>
+      <section title="Recommendations">
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+	    <t>
+		    This memo asks the IANA for no new parameters.
+	    </t>
+    </section>
+
+    <section anchor="Security" title="Security Considerations">
+    </section>
+    <section anchor="Acknowledgements" title="Acknowledgements">
+	    <t>
+		    Thanks to the following people (in alphabetical order) for their
+   review and feedback: Lorenzo Colitti, Erik Kline.
+	    </t>
+    </section>
+  </middle>
+
+  <!--  *****BACK MATTER ***** -->
+
+  <back>
+    <references title="Normative References">
+      &RFC2119;
+      &RFC4429;
+      &RFC4861;
+      &RFC8305;
+    </references>
+
+    <references title="Informative References">
+	    &RFC4941;
+       <?rfc include="reference.I-D.ietf-intarea-provisioning-domains.xml"?>
+    </references>
+
+  </back>
+</rfc>
