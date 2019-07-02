@@ -9,6 +9,7 @@
 <!ENTITY RFC6105 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6105.xml">
 <!ENTITY RFC6146 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6146.xml">
 <!ENTITY RFC6147 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6147.xml">
+<!ENTITY RFC6583 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6583.xml">
 <!ENTITY RFC6877 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6877.xml">
 <!ENTITY RFC7050 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7050.xml">
 <!ENTITY RFC7225 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7225.xml">
@@ -194,6 +195,9 @@
 		      The problem could be addressed from different angles. Possible approaches are:
 		      <list style="symbols">
 			      <t>
+				      Just do nothing.
+			      </t>
+			      <t>
 				      Make routers learn the host GUAs while the host perform SLAAC for those addresses.
 			      </t>
 			      <t>
@@ -205,11 +209,43 @@
 			      <t>
 				      Make the probing logic on hosts more robust.
 			      </t>
+			      <t>
+				      Increase the buffer size on routers.
+			      </t>
 		      </list>
 	      </t>
 	      <t>
 		      The following sections discuss those approaches in more details.
 	      </t>
+	      <section title="Do Nothing">
+		      <t>
+			      One of the possible approaches might be to declare that everything is working as intended.
+		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+						      No work required.
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+						      Unhappy users.
+					      </t>
+					      <t>
+						      Many support tickets.
+					      </t>
+					      <t>
+						      More resistance to deploy IPv6 and IPv6-Only networks.
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	      </section>
 	      <section title="Routers Learining Hosts GUAs During SLAAC">
 		      <t>
 		      </t>
@@ -238,8 +274,70 @@
 			      The Neighbor Discovery is designed to allow IPv6 nodes to discover neighboring nodes rechability and learn IPv6 to link-layer addresses mapping. Therefore ND seems to be the most appropriate tool to inform the first-hop routers about addresses the host is going to use. The following sections discusses potential apptoaches in more details.
 		      </t>
 		      <section title="Host Sending Unsolicited NA">
+			      <t>
+				      Section 4.4 of <xref target="RFC4861"/> says:
+			      </t>
+			      <t>
+				      "A node sends Neighbor Advertisements in response to Neighbor
+   Solicitations and sends unsolicited Neighbor Advertisements in order
+   to (unreliably) propagate new information quickly."
+			      </t>
+			      <t>
+				      Propagating information about new GUA as quickly as possible is exactly what is required to solve the problem outlined in this document. Therefore the host might send an unsolicited NA to advertize its GUA as soon as the said address enters Optimistic or Preferred state. The NA should inclide the target link-layer address option. To ensure that all first-hop routers receive the advertisement it could be sent to all-routers multicast address (ff02::2).
+			      </t>
+			      <t>
+				      As it's been mentioned, <xref target="RFC4861"/> explicitly states that receiving a NA should not create a new NC entry. However the justification for that requirement ("There is no need to create an entry if none exists, since the recipient has apparently not initiated any communication with the target.") clearly does not apply for the case discussed. As per <xref target="RFC2119"/> "there may exist valid reasons in particular circumstances to ignore a particular item, but the full implications must be understood and carefully weighed before choosing a different course.". Therefore routers creating a new NC entry upon receiving an unsolicited NA would still be compliant with <xref target="RFC4861"/>.
+			      </t>
+			      <t>
+				      It should be noted that some routing plaforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
+			      </t>
+		      
+		      <section title="Pros">
 		      <t>
+				      <list style="symbols">
+					      <t>
+						      Already implemented on some platforms.
+					      </t>
+					      <t>
+						      In accordance with <xref target="RFC4861"/>.
+					      </t>
+				      </list>
 		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+						      Allows a malicious host to execute an ND cache exhaustion attack. It's recommended that thsi functionality is configurable and recommendations from  <xref target="RFC6583"/> are taken into account.
+					      </t>
+					      <t>
+						      Requires hosts to send unsolicited NA (changes to the hosts).
+					      </t>
+					      <t>`
+						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	              </section>
+		      <section title="Host Sending NS to the Router Address from Its GUA">
+			      <t>
+				      The host could force creating a STALE entry for its GUA in the router ND cache by sending the following  Neighbor Solicitation message:
+				      <list style="symbols">
+					      <t>
+						      The NS source address is the host GUA.
+					      </t>
+					      <t>
+						      The Source Link-Layer Address option contains the host link-layer address.
+					      </t>
+					      <t>
+						      The target address is the host default gateway address (the default router address the host received in the RA).
+					      </t>
+				      </list>
+			      </t>
+			      <t>
+				      The main disadvantage of this approach is that it would not work if the GUA the host needs to advertise is still in the Optimistic state. The section 2.2 of <xref target="RFC4429"/> explicitly prohibits sending Neighbor Solicitations from an Optimistic Address.
+				      </t>
 		      <section title="Pros">
 		      <t>
 				      <list style="symbols">
@@ -252,18 +350,28 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
+						      Does not work for Optimistic addresses (see section 2.2 of <xref target="RFC4429"/>).
+						      </t>
+						      <t>
+						If first-hop redundancy is deployed in the network, the NS would reach the active router only, so all backup routers (or all active routers ex. one) would not get their neighbor cache updated.	      
+						      </t>
+					      <t>
+						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
 					      </t>
 				      </list>
 		      </t>
 	              </section>
 	              </section>
-		      <section title="Option2">
-		      <t>
+		      <section title="Host Sending Router Solicitation from its GUA">
+			      <t>
+				      The host could send a router solicitation message to 'all routers' multicast address, using its GUA as a source and including its link-layer address in Source Link-Layer Address option. As per the Section 6.2.6 of <xref target="RFC4861"/> the router would create a STALE entry for the host GUA.
+
 		      </t>
 		      <section title="Pros">
 		      <t>
 				      <list style="symbols">
 					      <t>
+						      Unlike NS packets, RS packets would reach all routers on link, allowing all routers to update their neighbor caches and preventing packet loss in case of asymmetric routing.
 					      </t>
 				      </list>
 		      </t>
@@ -272,31 +380,19 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
-					      </t>
-				      </list>
-		      </t>
-	              </section>
-	              </section>
-		      <section title="Option2">
-		      <t>
-		      </t>
-		      <section title="Pros">
-		      <t>
-				      <list style="symbols">
+						      Would not work for the host optimistic addresses ((see section 2.2 of <xref target="RFC4429"/> which prohibits using an Optimistic Address as the source address of a Router Solicitation with a SLLAO.
+						      </t>
+						      <t>
+							      Responding to RS with RA is not instant but delayed by a random interval. Additional delay would compromise the idea of populating the routers ND cache before the return traffic to the host GUA arrives.
+						      </t>
 					      <t>
+						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
 					      </t>
+
 				      </list>
 		      </t>
-	              </section>
-		      <section title="Cons">
-		      <t>
-				      <list style="symbols">
-					      <t>
-					      </t>
-				      </list>
-		      </t>
-	              </section>
-	              </section>
+	      </section>
+      </section>
 	      </section>
 	      <section title="Initiating Hosts2Routers Communication">
 		      <t>
@@ -319,6 +415,9 @@
 				      <list style="symbols">
 					      <t>
 						      Data packets to the router LLA could be blocked by security policy or control plane protection mechanism.
+					      </t>
+					      <t>
+						      Maximum overhead for routers control plane (in addition to processing ND packets, the data packet needs to be processed as well).
 					      </t>
 					      <t>
 						      If the first hop redunancy is implemented in the network the host ping/traceroute packet would reach the active router only. All backup routers would not receive it and therefore would not start populating the cache. So in the case of asymmetric traffic flow (packets leave the network via one router while the return flow is going via another) the backup router(s) still would not have the cache entry. (A hacky way to overcome this limitation would be sending ping/tracroute packet to 'all routers' ff02::2 multicast address).
@@ -350,7 +449,36 @@
 		      </t>
 	              </section>
 	      </section>
+	      <section title="Routers Should Buffer More Packets">
+		      <t>
+			      Another way to mitigate the issue, at least partially, would be increasing the number of packets the router could buffer while performing the neighbor discovery process for the INCOMPLETE cache entry.
+		      </t>
+		      <section title="Pros">
+		      <t>
+				      <list style="symbols">
+					      <t>
+						     Does not require changes on hosts. 
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+		      <section title="Cons">
+		      <t>
+				      <list style="symbols">
+					      <t>
+						      This approach makes the routers even more vulnerable to attack vectors described in <xref target="RFC6583"/>. In particular, it would amplify the impact of any scanning attack.
+					      </t>
+					      <t>
+						      Against the recommendations from the section 7 of <xref target="RFC6583"/>.
+					      </t>
+					      <t>
 
+						      Requires router vendors support.
+					      </t>
+				      </list>
+		      </t>
+	              </section>
+	      </section>
     </section>
       <section title="Recommendations">
     </section>
@@ -383,6 +511,7 @@
 
     <references title="Informative References">
 	    &RFC4941;
+	    &RFC6583;
        <?rfc include="reference.I-D.ietf-intarea-provisioning-domains.xml"?>
     </references>
 
