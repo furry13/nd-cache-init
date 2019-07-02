@@ -156,35 +156,38 @@
       </section>
       <section title="Terminology">
 	      <t>
-		      Neighbor Discovery:
+		      ND: Neighbor Discovery, <xref target="RFC4861"/>.
 	      </t>
 	      <t>
-		      SLAAC:
+		      SLAAC: IPv6 Stateless Address Autoconfiguration, <xref target="RFC4862"/>.
 	      </t>
 	      <t>
-		      NA:
+		      NS: Neighbor Solicitation, <xref target="RFC4861"/>.
 	      </t>
 	      <t>
-		      NS:
+		      NA: Neighbor Advertisement, <xref target="RFC4861"/>.
 	      </t>
 	      <t>
-		      RS:
+		      RS: Router Solicitation, <xref target="RFC4861"/>.
 	      </t> 
 	      <t>
-		      RA:
+		      RA: Router Advertisement,  <xref target="RFC4861"/>.
 	      </t>
 	      <t>
-		      LLA:
+		      SLLA: Source link-layer Address, an option in the ND packets containing the link-layer address of the sender of the packet (<xref target="RFC4861"/>).
 	      </t>
 	      <t>
-		      GUA:
+		      TLLA: Target link-layer Address, an option in the ND packets containing the link-layer address of the target (<xref target="RFC4861"/>).
+	      </t>
+	      <t>
+		      GUA: Global Unicast Address (<xref target="RFC4291"/>).
 	      </t>
 
 	      <t>
-		      DAD:
+		      DAD: Duplicate Address Detection,  <xref target="RFC4862"/>.
 	      </t>
 	      <t>
-		      Optimistic DAD:
+		      Optimistic DAD: a modification of DAD, <xref target="RFC4429"/>.
 	      </t>
 
          </section>
@@ -198,19 +201,16 @@
 				      Just do nothing.
 			      </t>
 			      <t>
-				      Make routers learn the host GUAs while the host perform SLAAC for those addresses.
+				     The host explicitly advertizes its GUAs using Neighbor Discovery mechanisms.
 			      </t>
 			      <t>
-				      Make the host explicitly advertize its GUAs using Neighbor Discovery mechanisms.
+				      The host initiates bidirectional communication to the router using the host GUA.
 			      </t>
 			      <t>
-				      Make the host to initiate bidirectional communication to the router using the host GUA.
+				      Making the probing logic on hosts more robust.
 			      </t>
 			      <t>
-				      Make the probing logic on hosts more robust.
-			      </t>
-			      <t>
-				      Increase the buffer size on routers.
+				      Increasing the buffer size on routers.
 			      </t>
 		      </list>
 	      </t>
@@ -241,29 +241,6 @@
 					      </t>
 					      <t>
 						      More resistance to deploy IPv6 and IPv6-Only networks.
-					      </t>
-				      </list>
-		      </t>
-	              </section>
-	      </section>
-	      <section title="Routers Learining Hosts GUAs During SLAAC">
-		      <t>
-		      </t>
-
-		      <t>
-		      </t>
-		      <section title="Pros">
-		      <t>
-				      <list style="symbols">
-					      <t>
-					      </t>
-				      </list>
-		      </t>
-	              </section>
-		      <section title="Cons">
-		      <t>
-				      <list style="symbols">
-					      <t>
 					      </t>
 				      </list>
 		      </t>
@@ -313,8 +290,7 @@
 					      <t>
 						      Requires hosts to send unsolicited NA (changes to the hosts).
 					      </t>
-					      <t>`
-						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
 					      </t>
 				      </list>
 		      </t>
@@ -342,6 +318,7 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
+						      Router implementations which follow recommendations made in <xref target="RFC6583"/> might prioritize responding to NS packets to own addresses.
 					      </t>
 				      </list>
 		      </t>
@@ -355,8 +332,7 @@
 						      <t>
 						If first-hop redundancy is deployed in the network, the NS would reach the active router only, so all backup routers (or all active routers ex. one) would not get their neighbor cache updated.	      
 						      </t>
-					      <t>
-						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
 					      </t>
 				      </list>
 		      </t>
@@ -429,29 +405,12 @@
 	      </section>
 	      <section title="Tweaking Probing Algorithms">
 		      <t>
+			      While tweaking the probing logic on devices might make the problem less visible it would be still desirable to avoid packet loss everytime the new GUA is used by a host. It would be quite tricky to adjust every probing algorith to find the right balance between prompt detection of network connectivity and false positives in IPv6-only mode.
 		      </t>
-		      <t>
-		      </t>
-		      <section title="Pros">
-		      <t>
-				      <list style="symbols">
-					      <t>
-					      </t>
-				      </list>
-		      </t>
-	              </section>
-		      <section title="Cons">
-		      <t>
-				      <list style="symbols">
-					      <t>
-					      </t>
-				      </list>
-		      </t>
-	              </section>
 	      </section>
-	      <section title="Routers Should Buffer More Packets">
+	      <section title="Routers Buffering More Packets">
 		      <t>
-			      Another way to mitigate the issue, at least partially, would be increasing the number of packets the router could buffer while performing the neighbor discovery process for the INCOMPLETE cache entry.
+			      Another way to mitigate the issue, at least partially, would be increasing the number of packets the router could buffer while performing the neighbor discovery process for the INCOMPLETE cache entry. However it would be against recommendations made in the section 7.2.2 of <xref target="RFC4861"/> and <xref target="RFC6583"/>.
 		      </t>
 		      <section title="Pros">
 		      <t>
@@ -480,7 +439,26 @@
 	              </section>
 	      </section>
     </section>
-      <section title="Recommendations">
+    <section title="Recommendations">
+	    <t>
+		    <list style="symbols">
+			    <t>
+				    Hosts SHOULD send at least one unsolicited NA packet to all-routers multicast address (ff02::2) as soon as one of the following events happens:
+				    <list style="symbols">
+					    <t>
+						    (if Optimistic DAD is used): a new Optimistic GUA is assigned to the host interface.
+					    </t>
+					    <t>
+						    (if Optimistic DAD is not used): a GUA changes the state from tentative to preferred.
+					    </t>
+				    
+				    </list> 
+			    </t>
+			    <t>
+				    Routers SHOULD have a configuration knob to enable creating ND cache entry upon receiving unsolicited NAs on a specific interface.
+			    </t>
+		    </list>
+	    </t>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
