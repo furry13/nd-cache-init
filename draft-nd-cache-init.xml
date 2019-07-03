@@ -106,7 +106,7 @@
 
     <abstract>
 	    <t>
-		    Neighbor Discovery (RFC4861) used by IPv6 nodes to determine the link-layer addresses of neighboring nodes as well as to discover and maintain reachability information. This document discusses how the neighbor discovery state machine on a first-hop router is causing user-visible connectivity issues when a new (not beeing seen on the network before) IPv6 address is being used.
+		    Neighbor Discovery (RFC4861) used by IPv6 nodes to determine the link-layer addresses of neighboring nodes as well as to discover and maintain reachability information. This document discusses how the neighbor discovery state machine on a first-hop router is causing user-visible connectivity issues when a new (not being seen on the network before) IPv6 address is being used.
 	    </t>
     </abstract>
   </front>
@@ -287,7 +287,7 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
-						      Allows a malicious host to execute an ND cache exhaustion attack. It's recommended that thsi functionality is configurable and recommendations from  <xref target="RFC6583"/> are taken into account.
+						      Allows a malicious host to execute an ND cache exhaustion attack. It's recommended that this functionality is configurable and recommendations from  <xref target="RFC6583"/> are taken into account.
 					      </t>
 					      <t>
 						      Requires hosts to send unsolicited NA (changes to the hosts).
@@ -360,11 +360,8 @@
 					      <t>
 						      Would not work for the host optimistic addresses ((see section 2.2 of <xref target="RFC4429"/> which prohibits using an Optimistic Address as the source address of a Router Solicitation with a SLLAO.
 						      </t>
-						      <t>
-							      Responding to RS with RA is not instant but delayed by a random interval. Additional delay would compromise the idea of populating the routers ND cache before the return traffic to the host GUA arrives.
-						      </t>
 					      <t>
-						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases RSes might not even reach the routers.
 					      </t>
 
 				      </list>
@@ -474,7 +471,7 @@
     <section anchor="Acknowledgements" title="Acknowledgements">
 	    <t>
 		    Thanks to the following people (in alphabetical order) for their
-   review and feedback: Lorenzo Colitti, Erik Kline.
+   review and feedback: Lorenzo Colitti, Erik Kline, Michael Richardson, Tatuya Jinmei.
 	    </t>
     </section>
   </middle>
