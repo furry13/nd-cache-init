@@ -12,12 +12,15 @@
 <!ENTITY RFC6146 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6146.xml">
 <!ENTITY RFC6147 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6147.xml">
 <!ENTITY RFC6583 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6583.xml">
+<!ENTITY RFC6775 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6775.xml">
 <!ENTITY RFC6877 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6877.xml">
 <!ENTITY RFC7050 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7050.xml">
 <!ENTITY RFC7225 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7225.xml">
 <!ENTITY RFC7556 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7556.xml">
 <!ENTITY RFC7858 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7858.xml">
+<!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
 <!ENTITY RFC8305 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8305.xml">
+<!ENTITY RFC8505 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8505.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -47,7 +50,7 @@
 <rfc ipr="trust200902"
      obsoletes=""
      category="info"
-     docName="draft-linkova-v6ops-nd-cache-init-00">
+     docName="draft-linkova-v6ops-nd-cache-init-01">
 
   <!-- category values: std, bcp, info, exp, and historic -->
 
@@ -115,14 +118,12 @@
 	  <section title="Introduction">
 		  <t>
 			  The section 7.2.5 of <xref target="RFC4861"/> states:
-			  "
-			  When a valid Neighbor Advertisement is received (either solicited or
+			  "When a valid Neighbor Advertisement is received (either solicited or
    unsolicited), the Neighbor Cache is searched for the target's entry.
    If no entry exists, the advertisement SHOULD be silently discarded.
    There is no need to create an entry if none exists, since the
    recipient has apparently not initiated any communication with the
-   target.
-			  "
+   target."
 		  </t>
 		  <t>
 			  This approach is perfectly suitable for host2host communications which are in most cases bi-directional and it could be expected that if a host A has an ND cache entry for the host B IPv6 address, the host B also has the corresponding ND entry for the host A address in its cache. However when a host communicates to off-link destinations via its first-hop router that logic does not apply. Here is the most typical scenario when the problem may arise: 
@@ -144,17 +145,18 @@
 			  </list>
 		  </t>
 		  <t>
-			  The above-mentioned scenario illustrates the problem happening when the device connects to the network for the first time/after a long timeout. However the same sequence of events happen when the host starts using the new (previously unseen by the router) GUA (e.g. a new privacy address <xref target="RFC4941"/>).
+			  The above-mentioned scenario illustrates the problem happening when the device connects to the network for the first time/after a long timeout. However the same sequence of events happen when the host starts using the new (previously unseen by the router or ) GUA (e.g. a new privacy address <xref target="RFC4941"/>) or if the router Neighbor Cache has been flushed.
 		  </t>
 		  <t>
 			  While in dual-stack networks this problem might hidden by Happy Eyeballs (<xref target="RFC8305"/>) it manifests itself quite clearly in IPv6-only networks, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solitions as unstable and non-deployable.
 		  </t>
 		  
-      <section title="Requirements Language">
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in <xref
-        target="RFC2119">RFC 2119</xref>.</t>
+		  <section title="Requirements Language">
+			  <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+                        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+                        "OPTIONAL" in this document are to be interpreted as described in
+                        BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+			when, and only when, they appear in all capitals, as shown here.</t>
       </section>
       <section title="Terminology">
 	      <t>
@@ -203,6 +205,9 @@
 				      Just do nothing.
 			      </t>
 			      <t>
+				      Migrate from the "reactive" Neighbor Discovery (<xref target="RFC4861"/>) to the registration-based mechanisms (<xref target="RFC8505"/>).
+			      </t>
+			      <t>
 				     The host explicitly advertizes its GUAs using Neighbor Discovery mechanisms.
 			      </t>
 			      <t>
@@ -248,6 +253,14 @@
 		      </t>
 	              </section>
 	      </section>
+	      <section title="Change to the Registration-Based Neighbor Discovery">
+		      <t>
+			      The most radical approach would be to move away from the reactive ND as defined in <xref target="RFC4861"/> and expand the registration-based ND (<xref target="RFC6775"/>, <xref target="RFC8505"/>) used in Low-Power Wireless Personal Area Networks (6LoWPANs) to the rest of IPv6 deployments.
+		      </t>
+		      <t>
+			      This option required some investigation and discussions. More text will be added here in the following revision of the draft.
+		      </t>
+	      </section>
 	      <section title="Hosts Explicitly Advertizing Their GUAs Using Existing ND Mechanisms">
 		      <t>
 			      The Neighbor Discovery is designed to allow IPv6 nodes to discover neighboring nodes rechability and learn IPv6 to link-layer addresses mapping. Therefore ND seems to be the most appropriate tool to inform the first-hop routers about addresses the host is going to use. The following sections discusses potential apptoaches in more details.
@@ -268,7 +281,7 @@
 				      As it's been mentioned, <xref target="RFC4861"/> explicitly states that receiving a NA should not create a new NC entry. However the justification for that requirement ("There is no need to create an entry if none exists, since the recipient has apparently not initiated any communication with the target.") clearly does not apply for the case discussed. As per <xref target="RFC2119"/> "there may exist valid reasons in particular circumstances to ignore a particular item, but the full implications must be understood and carefully weighed before choosing a different course.". Therefore routers creating a new NC entry upon receiving an unsolicited NA would still be compliant with <xref target="RFC4861"/>.
 			      </t>
 			      <t>
-				      It should be noted that some routing plaforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
+				      It should be noted that some routing and switching plaforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
 			      </t>
 		      
 		      <section title="Pros">
@@ -342,7 +355,7 @@
 	              </section>
 		      <section title="Host Sending Router Solicitation from its GUA">
 			      <t>
-				      The host could send a router solicitation message to 'all routers' multicast address, using its GUA as a source and including its link-layer address in Source Link-Layer Address option. As per the Section 6.2.6 of <xref target="RFC4861"/> the router would create a STALE entry for the host GUA.
+				      The host could send a router solicitation message to 'all routers' multicast address, using its GUA as a source. If the host link-layer address is included in the Source Link-Layer Address option, the router would create a STALE entry for the host GUA (see the section 6.2.6 of <xref target="RFC4861"/>). However this approach can not be used if the GUA is in optimistic state: the section 2.2 of <xref target="RFC4429"/> explicitly prohibits using an Optimistic Address as the source address of a Router Solicitation with a SLLAO as it might disrupt the rightful owner of the address in the case of a collision. So for the optimistic addresses the host can send an RS without SLLAO included. In that case the router may respond with either a multicast or a unicast RA (only the latter would create a cache entry). 
 
 		      </t>
 		      <section title="Pros">
@@ -358,8 +371,8 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
-						      Would not work for the host optimistic addresses ((see section 2.2 of <xref target="RFC4429"/> which prohibits using an Optimistic Address as the source address of a Router Solicitation with a SLLAO.
-						      </t>
+						      As for the Optimisitic addresses SLLAO can not be included into RS packets, the cache entry for the optimistic address would be created only if the router sends solicited RAs as unicast. In addition, there might be a random delay between receiving an RS and sending a unicast RA back (and creating a cache entry) which might undermine the idea of creating the cache entry proactively.
+					      </t>
 					      <t>
 						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases RSes might not even reach the routers.
 					      </t>
@@ -404,7 +417,7 @@
 	      </section>
 	      <section title="Tweaking Probing Algorithms">
 		      <t>
-			      While tweaking the probing logic on devices might make the problem less visible it would be still desirable to avoid packet loss everytime the new GUA is used by a host. It would be quite tricky to adjust every probing algorith to find the right balance between prompt detection of network connectivity and false positives in IPv6-only mode.
+			      While tweaking the probing logic on devices might make the problem less visible it would be still desirable to avoid packet loss everytime the new GUA is used by a host. It would be quite tricky to adjust every probing algorithm to find the right balance between prompt detection of network connectivity and false positives in IPv6-only mode.
 		      </t>
 	      </section>
 	      <section title="Routers Buffering More Packets">
@@ -454,10 +467,35 @@
 				    </list> 
 			    </t>
 			    <t>
-				    Routers SHOULD have a configuration knob to enable creating ND cache entry upon receiving unsolicited NAs on a specific interface.
+				    Routers SHOULD have a configuration knob to enable creating ND cache entry upon receiving unsolicited NAs on a specific interface. This document does not change the behavior if the ND cache entry already exists when receiving an unsolicited NA.
 			    </t>
 		    </list>
 	    </t>
+	    <section anchor="avoid_dis" title="Avoiding Disruption">
+		    <t>
+			    If hosts following the recommendations in this document are using the DAD mechanism defined in <xref target="RFC4862"/>, they would send unsolicited NA as soon as the address changes the state from tentative to preferred (after its uniqueness has been verified). However hosts willing minimize network stack configuration delays might be using optimistic addresses, which means there is possibility of the address not being unique on the link. The section 2.2 of <xref target="RFC4429"/> discusses meausures to ensure that ND packets from the optimistic address do not override any existing neighbor cache entries as it would cause traffic interruption of the righful address owner in case of address conflict.
+		    </t>
+		    <t>
+			    As hosts willing to speed up their network stack configuration are most likely to be affected by the problem outlined in this document it seems reasonable for such hosts to advertise their optimistic GUAs by sending unsolicited NAs. The main question to consider is the potential risk of overriding the cache entry for the rightful address owner if the optimistic address happens to be duplicated.
+		    </t>
+		    <t>
+			    As per section 7.2.5 of <xref target="RFC4861"/> if the Neighbor Cache entry for the target address already exists and is in in any state other than INCOMPLETE then the only change the unsolicited NA could cause is to change the entry from REACHABLE to STALE. It would not cause any traffic interruption for the rightful address owner.
+		    </t>
+		    <t>
+			    If there is no entry then it would be created/updated with the supplied LLA and its state set to STALE. In that case as soon as the entry is used for sending traffic to the host, the entry state will be changes to DELAY and the Neighbor Unreachability Detection would be started and the rightful owner LLA will be entered in the cache. So in the scenario when the rightful owner does not use the address for communication then it might be a short (a few seconds) period of time when the data packets sent from the outside could reach the host with the optimistic address. However it seems likely that hosts using Optimistic DAD would start sending/receiving traffic right away, so the first return packet would trigger the NUD process and rewrite the cache. 
+		    </t>
+		    <t>
+			    Another corner case is the INCOMPLETE cache entry for the address. If the host sends a unsolicited NA from the Optimistic address it would update the entry with the host LLA and set the entry to the STALE state. As the INCOMPLETE entry means that the router has started the ND process for the address and the multicast NS has been sent, the rightful owner is expected to reply with solicited NA which would recover the cache entry and set the LLA to the righful owner's one. The risk here:
+			    <list style="symbols">
+				    <t>
+					    The data packet arrives after the unsolicited NA from the host but before the rightful owner responded with the solicited NA. Those packets would be sent to the host with the optimistic address instead of its righful owner. However without the unsolicited NA those packets would have been dropped anyway (as the entry was in INCOMPLETE state).
+				    </t>
+			    </list>
+
+		    </t>
+
+    </section>
+
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
@@ -467,11 +505,17 @@
     </section>
 
     <section anchor="Security" title="Security Considerations">
+	    <t>
+                    One of the potential attack verctor to consider is a cache spoofing when the attacker might try to install a cache entry for the victim's IPv6 address and the attacker's Link-Layer address. However it should be noted that this document does not propose any changes for the scenario when the ND cache for the given IPv6 address already exists. Therefore it is not possible for the attacker to override any existing cache entry. 
+	    </t>
+	    <t>
+		    A malicious host could attempt to exhaust the neighbor cache on the router by creating a large number of STALE entries. However this attack vector is not new and this document does not increase the risk of such attack: the attacker could do it, for example, by sending a NS or RS packet with SLLAO included. All recommendations from <xref target="RFC6583"/> still apply.
+	    </t>
     </section>
     <section anchor="Acknowledgements" title="Acknowledgements">
 	    <t>
 		    Thanks to the following people (in alphabetical order) for their
-   review and feedback: Lorenzo Colitti, Erik Kline, Michael Richardson, Tatuya Jinmei.
+   review and feedback: Lorenzo Colitti, Tatuya Jinmei, Erik Kline, Warren Kumari, Michael Richardson, Pascal Thubert, Loganaden Velvindron, Eric Vyncke.
 	    </t>
     </section>
   </middle>
@@ -485,7 +529,10 @@
       &RFC4429;
       &RFC4861;
       &RFC4862;
+      &RFC6775;
       &RFC8305;
+      &RFC8505;
+      &RFC8174;
     </references>
 
     <references title="Informative References">
