@@ -109,7 +109,7 @@
 
     <abstract>
 	    <t>
-		    Neighbor Discovery (RFC4861) used by IPv6 nodes to determine the link-layer addresses of neighboring nodes as well as to discover and maintain reachability information. This document discusses how the neighbor discovery state machine on a first-hop router is causing user-visible connectivity issues when a new (not being seen on the network before) IPv6 address is being used.
+		    Neighbor Discovery (RFC4861) is used by IPv6 nodes to determine the link-layer addresses of neighboring nodes as well as to discover and maintain reachability information. This document discusses how the neighbor discovery state machine on a first-hop router is causing user-visible connectivity issues when a new (not being seen on the network before) IPv6 address is being used.
 	    </t>
     </abstract>
   </front>
@@ -134,13 +134,13 @@
 					  When a host joins the network it receives an RA packet from the first-hop router (either a periodic unsolicited RA or a response to an RS sent by the host). The RA contains information the host needs to perform SLAAC and to configure its network stack. Among other things the host populates its ND cache with the router link-local address and potentially link-layer address (if included in the RA Source Link-Layer Address option). 
 				  </t>
 				  <t>
-					  The host starts opening connections to off-link destinations. Very comon use case is a mobile device sending probes to detect the Internet connectivity and/or the captive portals presence on the network. To speed up that process many implementations are using the Optimistic Duplicate Address Detection (<xref target="RFC4429"/>) which allows them to send probes from their GUA before the DAD process is completed. Imprortant point here is that at that moment the device ND cache contains all information required to send those probes (such as the default gateway LLA and the link-layer address). The router ND cache, however, might contain an entry for the device link-local address (if the device has been performing the ND process for the roiter LLA) but there are no entries for the device GUA.
+					  The host starts opening connections to off-link destinations. Very common use case is a mobile device sending probes to detect the Internet connectivity and/or the captive portals presence on the network. To speed up that process many implementations are using the Optimistic Duplicate Address Detection (<xref target="RFC4429"/>) which allows them to send probes from their GUA before the DAD process is completed. Imprortant point here is that at that moment the device ND cache contains all information required to send those probes (such as the default gateway LLA and the link-layer address). The router ND cache, however, might contain an entry for the device link-local address (if the device has been performing the ND process for the roiter LLA) but there are no entries for the device GUA.
 				  </t>
 				  <t>
-					  Response packets for the probes (or any other traffic sent by the host) are received by the first-hop router. As the router does not have any ND cache entry for the host GUA, the router starts the neighbor discover process by creating an INCOMPLETE cache entry and then sending an NS to the Solicited Node Multicast Address. Apparently most of the router implementations buffer only one data packet while performing the ND process for its destination. Therefore all packets for the host GUA, except for the very first one are dropped until the address resolution process is completed.
+					  Response packets for the probes (or any other traffic sent by the host) are received by the first-hop router. As the router does not have any ND cache entry for the host GUA, the router starts the neighbor discovery process by creating an INCOMPLETE cache entry and then sending an NS to the Solicited Node Multicast Address. Apparently most of the router implementations buffer only one data packet while performing the ND process for its destination. Therefore all packets for the host GUA, except for the very first one are dropped until the address resolution process is completed.
 				  </t>
 				  <t>
-					  As many implementations send multiple probes in parallel it's very likely that all probes ex. the first one would be considered failed. If the host implements an exponential backoff for probing it leads to user-noticeble delay in detecting network connectivity/reporting the network as usable.
+					  As many implementations send multiple probes in parallel it's very likely that all probes ex. the first one would be considered failed. If the host implements an exponential backoff for probing it leads to user-noticeable delay in detecting network connectivity/reporting the network as usable.
 				  </t>
 			  </list>
 		  </t>
@@ -148,7 +148,7 @@
 			  The above-mentioned scenario illustrates the problem happening when the device connects to the network for the first time/after a long timeout. However the same sequence of events happen when the host starts using the new (previously unseen by the router or ) GUA (e.g. a new privacy address <xref target="RFC4941"/>) or if the router Neighbor Cache has been flushed.
 		  </t>
 		  <t>
-			  While in dual-stack networks this problem might hidden by Happy Eyeballs (<xref target="RFC8305"/>) it manifests itself quite clearly in IPv6-only networks, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solitions as unstable and non-deployable.
+			  While in dual-stack networks this problem might hidden by Happy Eyeballs (<xref target="RFC8305"/>) it manifests itself quite clearly in IPv6-only networks, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solutions as unstable and non-deployable.
 		  </t>
 		  
 		  <section title="Requirements Language">
@@ -222,7 +222,7 @@
 		      </list>
 	      </t>
 	      <t>
-		      The following sections discuss those approaches in more details.
+		      The following sections discuss those approaches in more detail.
 	      </t>
 	      <section title="Do Nothing">
 		      <t>
@@ -263,7 +263,7 @@
 	      </section>
 	      <section title="Hosts Explicitly Advertizing Their GUAs Using Existing ND Mechanisms">
 		      <t>
-			      The Neighbor Discovery is designed to allow IPv6 nodes to discover neighboring nodes rechability and learn IPv6 to link-layer addresses mapping. Therefore ND seems to be the most appropriate tool to inform the first-hop routers about addresses the host is going to use. The following sections discusses potential apptoaches in more details.
+			      The Neighbor Discovery is designed to allow IPv6 nodes to discover neighboring nodes reachability and learn IPv6 to link-layer addresses mapping. Therefore ND seems to be the most appropriate tool to inform the first-hop routers about addresses the host is going to use. The following sections discuss potential apptoaches in more detail.
 		      </t>
 		      <section title="Host Sending Unsolicited NA">
 			      <t>
@@ -275,13 +275,13 @@
    to (unreliably) propagate new information quickly."
 			      </t>
 			      <t>
-				      Propagating information about new GUA as quickly as possible is exactly what is required to solve the problem outlined in this document. Therefore the host might send an unsolicited NA to advertize its GUA as soon as the said address enters Optimistic or Preferred state. The NA should inclide the target link-layer address option. To ensure that all first-hop routers receive the advertisement it could be sent to all-routers multicast address (ff02::2).
+				      Propagating information about new GUA as quickly as possible is exactly what is required to solve the problem outlined in this document. Therefore the host might send an unsolicited NA to advertize its GUA as soon as the said address enters Optimistic or Preferred state. The NA should include the target link-layer address option. To ensure that all first-hop routers receive the advertisement it could be sent to all-routers multicast address (ff02::2).
 			      </t>
 			      <t>
 				      As it's been mentioned, <xref target="RFC4861"/> explicitly states that receiving a NA should not create a new NC entry. However the justification for that requirement ("There is no need to create an entry if none exists, since the recipient has apparently not initiated any communication with the target.") clearly does not apply for the case discussed. As per <xref target="RFC2119"/> "there may exist valid reasons in particular circumstances to ignore a particular item, but the full implications must be understood and carefully weighed before choosing a different course.". Therefore routers creating a new NC entry upon receiving an unsolicited NA would still be compliant with <xref target="RFC4861"/>.
 			      </t>
 			      <t>
-				      It should be noted that some routing and switching plaforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
+				      It should be noted that some routing and switching platforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
 			      </t>
 		      
 		      <section title="Pros">
@@ -305,7 +305,7 @@
 					      <t>
 						      Requires hosts to send unsolicited NA (changes to the hosts).
 					      </t>
-					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsolicited NAs might not even reach the routers.
 					      </t>
 				      </list>
 		      </t>
@@ -347,7 +347,7 @@
 						      <t>
 						If first-hop redundancy is deployed in the network, the NS would reach the active router only, so all backup routers (or all active routers ex. one) would not get their neighbor cache updated.	      
 						      </t>
-					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsoliciated NAs might not even reach the routers.
+					      <t> Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases unsolicited NAs might not even reach the routers.
 					      </t>
 				      </list>
 		      </t>
@@ -371,7 +371,7 @@
 		      <t>
 				      <list style="symbols">
 					      <t>
-						      As for the Optimisitic addresses SLLAO can not be included into RS packets, the cache entry for the optimistic address would be created only if the router sends solicited RAs as unicast. In addition, there might be a random delay between receiving an RS and sending a unicast RA back (and creating a cache entry) which might undermine the idea of creating the cache entry proactively.
+						      As for the Optimistic addresses SLLAO can not be included into RS packets, the cache entry for the optimistic address would be created only if the router sends solicited RAs as unicast. In addition, there might be a random delay between receiving an RS and sending a unicast RA back (and creating a cache entry) which might undermine the idea of creating the cache entry proactively.
 					      </t>
 					      <t>
 						      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases RSes might not even reach the routers.
@@ -384,7 +384,7 @@
 	      </section>
 	      <section title="Initiating Hosts2Routers Communication">
 		      <t>
-			      Every time the host configures a new GUA (when the address enters the Optimistic state or, if the optimistic DAD is not used, as soon as it changes the state from tentative to preferred) the host can a ping or traceroute packet to the default gateway LLA. As the RTT to the dafault gateway is lower than RTT to any off-link destinations it's quite likely that the router would start the neighbor discovery process for the host GUA before the first packet of the returning traffic arrives. There are pretty good chances that the process would be completed before the actual data traffic reaches the router. 
+			      Every time the host configures a new GUA (when the address enters the Optimistic state or, if the optimistic DAD is not used, as soon as it changes the state from tentative to preferred) the host can a ping or traceroute packet to the default gateway LLA. As the RTT to the default gateway is lower than RTT to any off-link destinations it's quite likely that the router would start the neighbor discovery process for the host GUA before the first packet of the returning traffic arrives. There are pretty good chances that the process would be completed before the actual data traffic reaches the router. 
 		      </t>
 		      <section title="Pros">
 			      <t>
@@ -408,7 +408,7 @@
 						      Maximum overhead for routers control plane (in addition to processing ND packets, the data packet needs to be processed as well).
 					      </t>
 					      <t>
-						      If the first hop redunancy is implemented in the network the host ping/traceroute packet would reach the active router only. All backup routers would not receive it and therefore would not start populating the cache. So in the case of asymmetric traffic flow (packets leave the network via one router while the return flow is going via another) the backup router(s) still would not have the cache entry. (A hacky way to overcome this limitation would be sending ping/tracroute packet to 'all routers' ff02::2 multicast address).
+						      If the first hop redundancy is implemented in the network the host ping/traceroute packet would reach the active router only. All backup routers would not receive it and therefore would not start populating the cache. So in the case of asymmetric traffic flow (packets leave the network via one router while the return flow is going via another) the backup router(s) still would not have the cache entry. (A hacky way to overcome this limitation would be sending ping/traceroute packet to 'all routers' ff02::2 multicast address).
 
 					      </t>
 				      </list>
@@ -473,7 +473,7 @@
 	    </t>
 	    <section anchor="avoid_dis" title="Avoiding Disruption">
 		    <t>
-			    If hosts following the recommendations in this document are using the DAD mechanism defined in <xref target="RFC4862"/>, they would send unsolicited NA as soon as the address changes the state from tentative to preferred (after its uniqueness has been verified). However hosts willing minimize network stack configuration delays might be using optimistic addresses, which means there is possibility of the address not being unique on the link. The section 2.2 of <xref target="RFC4429"/> discusses meausures to ensure that ND packets from the optimistic address do not override any existing neighbor cache entries as it would cause traffic interruption of the righful address owner in case of address conflict.
+			    If hosts following the recommendations in this document are using the DAD mechanism defined in <xref target="RFC4862"/>, they would send unsolicited NA as soon as the address changes the state from tentative to preferred (after its uniqueness has been verified). However hosts willing to minimize network stack configuration delays might be using optimistic addresses, which means there is possibility of the address not being unique on the link. The section 2.2 of <xref target="RFC4429"/> discusses measures to ensure that ND packets from the optimistic address do not override any existing neighbor cache entries as it would cause traffic interruption of the rightful  address owner in case of address conflict.
 		    </t>
 		    <t>
 			    As hosts willing to speed up their network stack configuration are most likely to be affected by the problem outlined in this document it seems reasonable for such hosts to advertise their optimistic GUAs by sending unsolicited NAs. The main question to consider is the potential risk of overriding the cache entry for the rightful address owner if the optimistic address happens to be duplicated.
@@ -482,13 +482,13 @@
 			    As per section 7.2.5 of <xref target="RFC4861"/> if the Neighbor Cache entry for the target address already exists and is in in any state other than INCOMPLETE then the only change the unsolicited NA could cause is to change the entry from REACHABLE to STALE. It would not cause any traffic interruption for the rightful address owner.
 		    </t>
 		    <t>
-			    If there is no entry then it would be created/updated with the supplied LLA and its state set to STALE. In that case as soon as the entry is used for sending traffic to the host, the entry state will be changes to DELAY and the Neighbor Unreachability Detection would be started and the rightful owner LLA will be entered in the cache. So in the scenario when the rightful owner does not use the address for communication then it might be a short (a few seconds) period of time when the data packets sent from the outside could reach the host with the optimistic address. However it seems likely that hosts using Optimistic DAD would start sending/receiving traffic right away, so the first return packet would trigger the NUD process and rewrite the cache. 
+			    If there is no entry then it would be created/updated with the supplied LLA and its state set to STALE. In that case as soon as the entry is used for sending traffic to the host, the entry state will be changed to DELAY and the Neighbor Unreachability Detection would be started and the rightful owner LLA will be entered in the cache. So in the scenario when the rightful owner does not use the address for communication then it might be a short (a few seconds) period of time when the data packets sent from the outside could reach the host with the optimistic address. However it seems likely that hosts using Optimistic DAD would start sending/receiving traffic right away, so the first return packet would trigger the NUD process and rewrite the cache. 
 		    </t>
 		    <t>
-			    Another corner case is the INCOMPLETE cache entry for the address. If the host sends a unsolicited NA from the Optimistic address it would update the entry with the host LLA and set the entry to the STALE state. As the INCOMPLETE entry means that the router has started the ND process for the address and the multicast NS has been sent, the rightful owner is expected to reply with solicited NA which would recover the cache entry and set the LLA to the righful owner's one. The risk here:
+			    Another corner case is the INCOMPLETE cache entry for the address. If the host sends an unsolicited NA from the Optimistic address it would update the entry with the host LLA and set the entry to the STALE state. As the INCOMPLETE entry means that the router has started the ND process for the address and the multicast NS has been sent, the rightful owner is expected to reply with solicited NA which would recover the cache entry and set the LLA to the rightful  owner's one. The risk here:
 			    <list style="symbols">
 				    <t>
-					    The data packet arrives after the unsolicited NA from the host but before the rightful owner responded with the solicited NA. Those packets would be sent to the host with the optimistic address instead of its righful owner. However without the unsolicited NA those packets would have been dropped anyway (as the entry was in INCOMPLETE state).
+					    The data packet arrives after the unsolicited NA from the host but before the rightful owner responded with the solicited NA. Those packets would be sent to the host with the optimistic address instead of its rightful  owner. However without the unsolicited NA those packets would have been dropped anyway (as the entry was in INCOMPLETE state).
 				    </t>
 			    </list>
 
@@ -506,7 +506,7 @@
 
     <section anchor="Security" title="Security Considerations">
 	    <t>
-                    One of the potential attack verctor to consider is a cache spoofing when the attacker might try to install a cache entry for the victim's IPv6 address and the attacker's Link-Layer address. However it should be noted that this document does not propose any changes for the scenario when the ND cache for the given IPv6 address already exists. Therefore it is not possible for the attacker to override any existing cache entry. 
+                    One of the potential attack vector to consider is a cache spoofing when the attacker might try to install a cache entry for the victim's IPv6 address and the attacker's Link-Layer address. However it should be noted that this document does not propose any changes for the scenario when the ND cache for the given IPv6 address already exists. Therefore it is not possible for the attacker to override any existing cache entry. 
 	    </t>
 	    <t>
 		    A malicious host could attempt to exhaust the neighbor cache on the router by creating a large number of STALE entries. However this attack vector is not new and this document does not increase the risk of such attack: the attacker could do it, for example, by sending a NS or RS packet with SLLAO included. All recommendations from <xref target="RFC6583"/> still apply.
