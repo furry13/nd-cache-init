@@ -505,7 +505,7 @@
 
 	    </t>
 	    <t>
-		    As the recommendations include modification to Neighbor Discovery state machine defined in <xref target="RFC4861"/> and hosts behaviour, they are discussed in a separate Standart track document <xref target="I-D.linkova-6man-grand"/>.
+		    As the recommendations include modification to Neighbor Discovery state machine defined in <xref target="RFC4861"/> and hosts behaviour, they are discussed in a separate Standart track document draft-linkova-6man-grand.
 	    </t>
     </section>
 
@@ -517,7 +517,7 @@
 
     <section anchor="Security" title="Security Considerations">
 	    <t>
-		    See the Security section of <xref target="I-D.linkova-6man-grand"/>.
+		    See the Security Considerations section of draft-linkova-6man-grand.
 	    </t>
     </section>
     <section anchor="Acknowledgements" title="Acknowledgements">
@@ -546,7 +546,6 @@
     <references title="Informative References">
 	    &RFC4941;
 	    &RFC6583;
-	    <?rfc include="reference.I-D.linkova-6man-grand" ?>
     </references>
 
   </back>
