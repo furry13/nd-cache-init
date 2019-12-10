@@ -158,7 +158,7 @@
 			  However the same sequence of events happen when the host starts using the new GUA previously unseen by the router, such as a new privacy address <xref target="RFC4941"/> or if the router Neighbor Cache has been flushed.
 		  </t>
 		  <t>
-			  While in dual-stack networks this problem might hidden by Happy Eyeballs <xref target="RFC8305"/> it manifest quite clearly in IPv6-only envinronments, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solutions as unstable and non-deployable.
+			  While in dual-stack networks this problem might hidden by Happy Eyeballs <xref target="RFC8305"/> it manifest quite clearly in IPv6-only environments, especially wireless ones, leading to poor user experience and contributing to negative perception of IPv6-only solutions as unstable and non-deployable.
 		  </t>
 		  
 		  <section title="Requirements Language">
@@ -216,11 +216,11 @@
 		 
 		 <list style="symbols">
 			 <t>
-				 If the router does not have an Neighbor Cache entry for the address, a STALE entry needs to be created.
+				 If the router does not have a Neighbor Cache entry for the address, a STALE entry needs to be created.
 			 </t>
 			 <t>
 				 The solution needs to work for Optimistic addresses as well.
-				 Devices implementing the Optimistic DAD usually attempt to minimize the delay in connecting to the network and therefore more likely to be affected by the problem described in this document.
+				 Devices implementing the Optimistic DAD usually attempt to minimize the delay in connecting to the network and therefore are more likely to be affected by the problem described in this document.
 			 </t>
 			 <t>
 				 In case of duplicate addresses present in the network the proposed solution MUST NOT override the existing entry.
@@ -248,7 +248,7 @@
 				      Therefore the host might send an unsolicited NA with the target link-layer address option to advertize its GUA as soon as the said address enters Optimistic or Preferred state.
 		      </t>
 		      <t>
-			      The proposed solution is discussed in <xref target="I-D.linkova-6man-grand" />. In summary the follling changes to  <xref target="RFC4861"/> are proposed:
+			      The proposed solution is discussed in <xref target="I-D.linkova-6man-grand" />. In summary the follwing changes to  <xref target="RFC4861"/> are suggested:
 			      <list style="symbols">
 				      <t>
 					       Hosts SHOULD send at least one unsolicited NA packet to all-routers multicast address (ff02::2) as soon as one of the following events happens:
@@ -371,8 +371,8 @@
 			      This approach has the following drawbacks:
                                       <list style="symbols">
                                               <t>
-						      If the address is in the Optimistic state the RS can not contain SLLAO. As a result the router would only create a cache entry if the solicited RAs is sent as as unicast.
-						      Routers sending solicted RAs as multicast would not create a new cache entry as they do not need to send a unicast packet back to the host.
+						      If the address is in the Optimistic state the RS can not contain SLLAO. As a result the router would only create a cache entry if the solicited RAs is sent as as a unicast.
+						      Routers sending solicited RAs as multicast would not create a new cache entry as they do not need to send a unicast packet back to the host.
 					      </t>
 					      <t>
 						      There might be a random delay between receiving an RS and sending a unicast RA back (and creating a cache entry) which might undermine the idea of creating the cache entry proactively.
@@ -388,7 +388,7 @@
 
 	       <section title="Routers Populating Their Caches by Gleaning From Neighbor Discovery Packets">
 		       <t>
-			       Routers may be able to learn about new address by gleaning from the DAD Neighbor Solicitation messages.
+			       Routers may be able to learn about new addresses by gleaning from the DAD Neighbor Solicitation messages.
 			       The router could listen to all solicited node multicast address groups and upon receiving a Neighbor Solicitation from the unspecified address search its Neighbor Cache for the solicitation's Target Address.
 			       If no entry exists the router may create an entry, set its reachability state to 'INCOMPLETE' and start the address resolution for that entry.
                       </t>
@@ -431,7 +431,9 @@
 	      <section title="Transit Dataplane Traffic From a New Address Triggering Address Resolution">
 		      <t>
 			      When a router receives a transit packet it might check the presence of the neighbor cache entry for the packet source address and if the entry does not exist start address resolution process.
-			      This approach does ensure that a Neighbor Cache entry is proactively created every time a new, previously unseen GUA is  used for sending offlink traffic. However this functionalilty needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguihs between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space. In addition implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
+			      This approach does ensure that a Neighbor Cache entry is proactively created every time a new, previously unseen GUA is used for sending offlink traffic.
+			      However this functionality needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguish between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space.
+			      In addition, implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
 		      </t>
 	      </section>
 
@@ -445,7 +447,7 @@
 
     <section anchor="Security" title="Security Considerations">
 	    <t>
-		    This memo documents the operational issue and does not intorduce any new security considerations.
+		    This memo documents the operational issue and does not introduce any new security considerations.
 		    Security considerations of the proposed solution are discussed in the corresponding section of <xref target="I-D.linkova-6man-grand"/>.
 	    </t>
     </section>
