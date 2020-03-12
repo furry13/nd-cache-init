@@ -50,7 +50,7 @@
 <rfc ipr="trust200902"
      obsoletes=""
      category="info"
-     docName="draft-ietf-v6ops-nd-cache-init-01">
+     docName="draft-ietf-v6ops-nd-cache-init-02">
 
   <!-- category values: std, bcp, info, exp, and historic -->
 
@@ -248,7 +248,7 @@
 				      Therefore the host might send an unsolicited NA with the target link-layer address option to advertize its GUA as soon as the said address enters Optimistic or Preferred state.
 		      </t>
 		      <t>
-			      The proposed solution is discussed in <xref target="I-D.linkova-6man-grand" />. In summary the follwing changes to  <xref target="RFC4861"/> are suggested:
+			      The proposed solution is discussed in <xref target="I-D.ietf-6man-grand" />. In summary the follwing changes to  <xref target="RFC4861"/> are suggested:
 			      <list style="symbols">
 				      <t>
 					       Hosts SHOULD send at least one unsolicited NA packet to all-routers multicast address (ff02::2) as soon as one of the following events happens:
@@ -432,8 +432,18 @@
 		      <t>
 			      When a router receives a transit packet it might check the presence of the neighbor cache entry for the packet source address and if the entry does not exist start address resolution process.
 			      This approach does ensure that a Neighbor Cache entry is proactively created every time a new, previously unseen GUA is used for sending offlink traffic.
-			      However this functionality needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguish between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space.
-			      In addition, implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
+However this approach has a number of limitations, in particular:
+<list style="symbols">
+<t>If traffic flows are asymmetrical the return traffic might not transit the same router as the original traffic which triggered the address resolution.
+So the neighbor cache entry is created on the "wrong" router, not the one which actually needs the neighbor cache entry for the host address.
+</t>
+<t>
+The functionality needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguish between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space. 
+</t>
+<t>
+Implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
+</t>
+</list>
 		      </t>
 	      </section>
 
@@ -448,7 +458,7 @@
     <section anchor="Security" title="Security Considerations">
 	    <t>
 		    This memo documents the operational issue and does not introduce any new security considerations.
-		    Security considerations of the proposed solution are discussed in the corresponding section of <xref target="I-D.linkova-6man-grand"/>.
+		    Security considerations of the proposed solution are discussed in the corresponding section of <xref target="I-D.ietf-6man-grand"/>.
 	    </t>
     </section>
     <section anchor="Acknowledgements" title="Acknowledgements">
@@ -472,7 +482,7 @@
       &RFC8305;
       &RFC8505;
       &RFC8174;
-      <?rfc include="reference.I-D.linkova-6man-grand" ?>
+      <?rfc include="reference.I-D.ietf-6man-grand" ?>
     </references>
 
     <references title="Informative References">
