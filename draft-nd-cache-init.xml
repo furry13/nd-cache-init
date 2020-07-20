@@ -51,7 +51,7 @@
 <rfc ipr="trust200902"
      obsoletes=""
      category="info"
-     docName="draft-ietf-v6ops-nd-cache-init-02">
+     docName="draft-ietf-v6ops-nd-cache-init-03">
 
   <!-- category values: std, bcp, info, exp, and historic -->
 
@@ -132,7 +132,7 @@
 		  <t>
 			  <list style="numbers">
 				  <t>
-					  A host joins the network and receives a Router Advertisement (RA( packet from the first-hop router (either a periodic unsolicited RA or a response to a Router Solicitation sent by the host).
+					  A host joins the network and receives a Router Advertisement (RA) packet from the first-hop router (either a periodic unsolicited RA or a response to a Router Solicitation sent by the host).
 					 The RA contains information the host needs to perform SLAAC and to configure its network stack.
 					 As in most cases the RA also contains the Source link-layer address of the router, the host can populate its Neighbor Cache with the router's link-local and link-layer addresses. 
 				  </t>
@@ -140,7 +140,7 @@
 					  The host starts opening connections to off-link destinations.
 					  A very common use case is a mobile device sending probes to detect the Internet connectivity and/or the captive portals presence on the network.
 					  To speed up that process many implementations use Optimistic Duplicate Address Detection <xref target="RFC4429"/> which allows them to send probes from their GUA before the DAD process is completed.
-					  At that moment the device ND cache contains all information required to send those probes (such as the default gateway LLA and the link-layer address).
+					  At that moment the device ND cache contains all information required to send those probes (such as the default router link-local the link-layer addresses).
 					  The router ND cache, however, might contain an entry for the device link-local address (if the device has been performing the address resolution for the router LLA) but there are no entries for the device GUA.
 				  </t>
 				  <t>
@@ -209,6 +209,9 @@
 	      <t>
 		      Optimistic DAD: a modification of DAD, <xref target="RFC4429"/>.
 	      </t>
+	      <t>
+			      FCFS SAVI: First-Come, First-Served Source Address Validation, <xref target="RFC6620"/>.
+	      </t>
 
          </section>
  </section>
@@ -216,7 +219,7 @@
  	<section  title="Solution Requirements" >
 	 <t>
 		 It would be highly desirable to improve the Neighbor Discovery mechanics so routers have a usable cache entry for a host address by the time the first packet for that address is received by the router.
-		 In particular,
+		 In particular:
 		 
 		 <list style="symbols">
 			 <t>
@@ -232,8 +235,11 @@
 			 <t>
 				 In topologies with multiple first hop routers the cache needs to be updated on all of them, as traffic might be asymmetric: outgoing flows leaving the network via one router while the return traffic enters the segment via another one.
 			</t>
-		 </list>
-	 </t>
+		</list>
+	</t>
+	<t>
+			In addition the solution MUST NOT exacerbate issues described in <xref target="RFC6583"/> and MUST be compatible with the recomendations provided in  <xref target="RFC6583"/>.
+	</t>
 
  	</section>
 	<section title="Solution Overview">
@@ -249,7 +255,7 @@
 		      </t>
 		      <t>
 				      Propagating information about new GUA as quickly as possible is exactly what is required to solve the problem outlined in this document.
-				      Therefore the host might send an unsolicited NA with the target link-layer address option to advertize its GUA as soon as the said address enters Optimistic or Preferred state.
+				      Therefore the host might send an unsolicited NA with the target link-layer address option to advertise its GUA as soon as the said address enters Optimistic or Preferred state.
 		      </t>
 		      <t>
 			      The proposed solution is discussed in <xref target="I-D.ietf-6man-grand" />. In summary the following changes to  <xref target="RFC4861"/> are suggested:
@@ -275,7 +281,7 @@
 				      It should be noted that some routing and switching platforms have implemented such behaviour already. Administrators could enable creating neighbor discovery cache entries based on unsolicited NA packets sent from the previously unknown neighbors on that interface. 
 		      </t>
 		      <t>
-				      Network devices implementing First-Come, First-Served Source Address Validation (FCFS SAVI, <xref target="RFC6620"/>) might drop Neighbor Advertisements received through a Validating Port which is in the TENTATIVE state (see Section 2.3.2 of<xref target="RFC6620"/>).
+				      Network devices implementing FCFS SAVI might drop Neighbor Advertisements received through a Validating Port which is in the TENTATIVE state (see Section 2.3.2 of<xref target="RFC6620"/>).
 					      Therefore hosts using Optimistic DAD might not benefit from the proposed solution if FCFS SAVI is implemeneted on the network infrastructure. 
 					      <xref target="I-D.ietf-6man-grand" /> discusses in more details how the proposed solution interacts with SAVI.
 
@@ -313,7 +319,7 @@
                       </list>
               </t>
               <t>
-                      The following sections discuss those approaches in more detail.
+                      It should be noted that some of those options are already implemented by some vendors. The following sections discuss those approaches and the reasons they were discarded.
 	      </t>
 	      <section title="Do Nothing">
                       <t>
@@ -353,7 +359,7 @@
 					      The Source Link-Layer Address option contains the host link-layer address.
 				      </t>
 				      <t>
-					      The target address is the host default gateway address (the default router address the host received in the RA).
+					      The target address is the host default router address (the default router address the host received in the RA).
 				      </t>
 			      </list>
 		      </t>
@@ -392,7 +398,7 @@
 						      There might be a random delay between receiving an RS and sending a unicast RA back (and creating a cache entry) which might undermine the idea of creating the cache entry proactively.
                                               </t>
                                               <t>
-                                                      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases RSes might not even reach the routers.
+                                                      Some wireless devices are known to fiddle with ND packets and perform various non-obvious forms of ND proxy actions. In some cases the RS might not even reach the routers.
                                               </t>
 
                                       </list>
@@ -425,7 +431,7 @@
 	      <section title="Initiating Hosts-to-Routers Communication">
 		      <t>
 			      The host may force the router to start address resolution by sending a data packet such as ping or traceroute to its default router link-local address, using the GUA as a source address.  
-			      As the RTT to the default gateway is lower than RTT to any off-link destinations it's quite likely that the router would start the neighbor discovery process for the host GUA before the first packet of the returning traffic arrives.
+			      As the RTT to the default router  is lower than RTT to any off-link destinations it's quite likely that the router would start the neighbor discovery process for the host GUA before the first packet of the returning traffic arrives.
                       </t>
                       <t> The downside of this approach includes:
                                       <list style="symbols">
@@ -446,8 +452,18 @@
 		      <t>
 			      When a router receives a transit packet it might check the presence of the neighbor cache entry for the packet source address and if the entry does not exist start address resolution process.
 			      This approach does ensure that a Neighbor Cache entry is proactively created every time a new, previously unseen GUA is used for sending offlink traffic.
-			      However this functionality needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguish between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space.
-			      In addition, implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
+However this approach has a number of limitations, in particular:
+<list style="symbols">
+<t>If traffic flows are asymmetrical the return traffic might not transit the same router as the original traffic which triggered the address resolution.
+So the neighbor cache entry is created on the "wrong" router, not the one which actually needs the neighbor cache entry for the host address.
+</t>
+<t>
+The functionality needs to be limited to explicitly configured networks/interfaces, as the router needs to distinguish between onlink addresses (ones the router needs to have Neighbor Cache entries for) and the rest of the address space.
+</t>
+<t>
+Implementing such functionality is much more complicated than all other solutions as it would involve complex data-control planes interaction.
+</t>
+</list>
 		      </t>
 	      </section>
 
@@ -468,7 +484,8 @@
     <section anchor="Acknowledgements" title="Acknowledgements">
 	    <t>
 		    Thanks to the following people (in alphabetical order) for their
-   review and feedback: Mikael Abrahamsson, Lorenzo Colitti, Owen DeLong, Igor Gashinsky, Fernando Gont, Tatuya Jinmei, Erik Kline, Warren Kumari, Michael Richardson, Dave Thaler, Pascal Thubert, Loganaden Velvindron, Eric Vyncke.
+   review and feedback: Mikael Abrahamsson, Lorenzo Colitti, Owen DeLong, Igor Gashinsky, Fernando Gont, Tatuya Jinmei, Erik Kline, Warren Kumari, 
+Jordi Palet Martinez, Michael Richardson, Dave Thaler, Pascal Thubert, Loganaden Velvindron, Eric Vyncke.
 	    </t>
     </section>
   </middle>
@@ -484,6 +501,7 @@
       &RFC4862;
       &RFC6620;
       &RFC6775;
+      &RFC6583;
       &RFC8305;
       &RFC8505;
       &RFC8174;
@@ -492,7 +510,6 @@
 
     <references title="Informative References">
 	    &RFC4941;
-	    &RFC6583;
 	    <?rfc include="reference.I-D.halpern-6man-nd-pre-resolve-addr" ?>
     </references>
 
